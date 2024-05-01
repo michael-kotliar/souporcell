@@ -6,6 +6,7 @@ parser = argparse.ArgumentParser(
     description="single cell RNAseq mixed genotype clustering using sparse mixture model clustering.")
 parser.add_argument("-i", "--bam", required = True, help = "cellranger bam")
 parser.add_argument("-b", "--barcodes", required = True, help = "barcodes.tsv from cellranger")
+parser.add_argument("--regions", required = False, help = "regions.bed file to optionally restrict searching for SNPs to only selected regions")
 parser.add_argument("-f", "--fasta", required = True, help = "reference fasta file")
 parser.add_argument("-t", "--threads", required = True, type = int, help = "max threads to use")
 parser.add_argument("-o", "--out_dir", required = True, help = "name of directory to place souporcell files")
@@ -581,6 +582,11 @@ if not args.skip_remap:
     bam = args.out_dir + "/souporcell_minimap_tagged_sorted.bam" 
 else:
     bam = args.bam
+if args.regions != None:                                             # in case we want to subset to selected regions
+    filtered_bam = args.out_dir + "/filtered_by_regions.bam"
+    subprocess.check_call(["samtools", "view", "-L", args.regions, "-o", filtered_bam, bam])
+    subprocess.check_call(["samtools", "index", filtered_bam])
+    bam = filtered_bam
 if not os.path.exists(args.out_dir + "/variants.done"):
     final_vcf = freebayes(args, bam, fasta)
 else:
