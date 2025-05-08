@@ -19,13 +19,13 @@ souporcell is comprised of 6 steps with the first 3 using external tools and the
 
 Download singularity image (1.3gb) (singularity is similar to docker but safe for clusters)
 ```
-singularity pull shub://wheaton5/souporcell
+singularity pull --arch amd64 library://wheaton5/souporcell/souporcell:release
 ```
 
 If you are running on a scientific cluster, they will likely have singularity, contact your sysadmin for more details. 
 If you are running on your own linux box you may need to install [singularity](https://www.sylabs.io/guides/3.2/user-guide/quick_start.html#quick-installation-steps)
 
-requires singularity >= 3.0
+requires singularity >= 3.0 or apptainer version >= 1.0.0 (singularity rebranded as apptainer and changed its version numbers)
 ```
 which singularity
 singularity --version
@@ -93,11 +93,11 @@ If you have a common snps file you may want to use the --common_variants option 
 
 Common variant files from 1k genomes filtered to variants >= 2% allele frequency in the population and limited to SNPs can be found here for GRCh38
 ```
-wget --load-cookies /tmp/cookies.txt "https://docs.google.com/uc?export=download&confirm=$(wget --quiet --save-cookies /tmp/cookies.txt --keep-session-cookies --no-check-certificate 'https://docs.google.com/uc?export=download&id=13aebUpEKrtjliyT9rYzRijtkNJVUk5F_' -O- | sed -rn 's/.*confirm=([0-9A-Za-z_]+).*/\1\n/p')&id=13aebUpEKrtjliyT9rYzRijtkNJVUk5F_" -O common_variants_grch38.vcf && rm -rf /tmp/cookies.txt
+curl ftp://ftp.eng.auburn.edu/pub/whh0027/common_variants_grch38.vcf.gz -o common_variants_grch38.vcf.gz
 ```
 or for hg19 here
 ```
-wget --load-cookies /tmp/cookies.txt "https://docs.google.com/uc?export=download&confirm=$(wget --quiet --save-cookies /tmp/cookies.txt --keep-session-cookies --no-check-certificate 'https://docs.google.com/uc?export=download&id=1lw4T6d7uXsm9dt39ZtEwpuB2VTY3wK1y' -O- | sed -rn 's/.*confirm=([0-9A-Za-z_]+).*/\1\n/p')&id=1lw4T6d7uXsm9dt39ZtEwpuB2VTY3wK1y" -O common_variants_hg19.vcf && rm -rf /tmp/cookies.txt
+curl ftp://ftp.eng.auburn.edu/pub/whh0027/filtered_2p_1kgenomes_hg19.vcf.gz -o common_variants_hg19.vcf.gz
 ```
 
 ## Practice/Testing data set: Demuxlet paper data
@@ -206,7 +206,7 @@ samtools index minitagged_sorted.bam
 You may wish to break this into multiple jobs such as 1 job per chromosome and merge after but the basic command is the following.
 Requires [freebayes](https://github.com/ekg/freebayes) and add /path/to/freebayes/bin to your PATH
 ```
-freebayes -f <reference_fasta> -iXu -C 2 -q 20 -n 3 -E 1 -m 30 --min-coverage 6 --max-coverage 100000 minitagged_sorted.bam
+freebayes -f <reference_fasta> -iXu -C 2 -q 20 -n 3 -E 1 -m 30 --min-coverage 6 --limit-coverage 100000 minitagged_sorted.bam
 ```
 
 ### 3. Cell allele counting 
